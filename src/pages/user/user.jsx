@@ -12,11 +12,7 @@ export default class User extends Component{
 	userRef = React.createRef();
 	state={
 		users :[],
-		isShowForm:false,
-		formItemLayout:{
-		  labelCol: { span: 6 },
-		  wrapperCol: { span: 14 },
-		}
+		isShowForm:false
 	}
 
 	constructor(props){
@@ -155,7 +151,7 @@ export default class User extends Component{
 	};
 	
 	render(){
-		const {columns,users,isShowForm,formItemLayout,roles} = this.state
+		const {columns,users,isShowForm,roles} = this.state
 		const user = this.user
 		return(
 			<div className="productUser">

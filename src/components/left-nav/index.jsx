@@ -2,11 +2,12 @@ import React,{Component} from 'react'
 import {Link , withRouter} from 'react-router-dom'
 import { Layout, Menu } from 'antd';
 // import { HomeOutlined,AppstoreOutlined,UnorderedListOutlined,ToolOutlined,UserOutlined,SafetyOutlined,AreaChartOutlined,BarChartOutlined,LineChartOutlined,PieChartOutlined } from '@ant-design/icons';
+import {setHeadTitle} from '../../redux/actions'
+import {connect} from 'react-redux'
 
 import './index.less'
 import logo from '../../assets/images/logo.png'
 import menuConfig from '../../config/menuConfig'
-import memoryUtils from '../../utils/memoryUtils'
 
 
 const { SubMenu } = Menu;
@@ -14,6 +15,8 @@ const { Sider } = Layout;
 
 //左侧导航的组件
 class LeftNav extends Component{
+
+	//当前是否能够调用到props
 
 	constructor(props){
 		super(props);
@@ -25,24 +28,30 @@ class LeftNav extends Component{
 	}
 
 	//点击时候进行跳转 this.props为空 之后进行尝试 
-	handleClick = (event)=>{
+	// handleClick = (event)=>{
 		// const key = event.key
 		// console.log(event)
 		//将对应选中项的文字保存于内存中方便调用
-		memoryUtils.title = event.item.props.children[1].props.children.props.children;
+		// memoryUtils.title = event.item.props.children[1].props.children.props.children;
 		// console.log(this)
 		// this.props.history.push(key)
-	} 
+	// } 
 
 	//循环渲染menunode节点
 	getMenuNodes = (menuList) =>{
+		const path = this.props.location.pathname
 		//获取 memoryUtils 中当前user的menus信息 对 menuConfig 进行对比筛选 符合条件的才进行渲染
+		//并且每一条 link 都会在点击时候触发 redux的 setHeadTitle 将对应的title值传递到redux中保存
 		return menuList.reduce((pre,item)=>{
 			if(this.hasAuth(item)){
 				if(!item.children){
+					if(item.key === path || path.indexOf(item.key) === 0){
+						//通过当前请求的路由路径 判断item是否当前选中的item
+						this.props.setHeadTitle(item.title)
+					}
 					pre.push((
 						<Menu.Item key={item.key} icon={item.icon}>
-				          	<Link to={item.key}>{item.title}</Link>
+				          	<Link to={item.key} onClick={()=>this.props.setHeadTitle(item.title)}>{item.title}</Link>
 	          		  	</Menu.Item>
 		          	))
 				}else{
@@ -61,8 +70,8 @@ class LeftNav extends Component{
 	hasAuth = (item)=>{
 		// console.log(item)
 		const {key,isPublic} = item
-		const {menus} = memoryUtils.user.role
-		const username = memoryUtils.user.username
+		const {menus} = this.props.user.role
+		const username = this.props.user.username
 		//如果是admin 管理员 就直接通过 他是全部权限
 		//或者 如果当前item为公开的(isPublic值为true时) 直接返回true
 		//又或者 当前用户有此item的权限 --- key 是否在menus之中
@@ -84,7 +93,7 @@ class LeftNav extends Component{
 		if(pathName === '/') pathName = '/home'
 		// this.state = { pathKey: pathName}
 		// 如果当前path为SubMenu下的子菜单项 那么就让对应的SubMenu展开
-		let openKey,thisTitle
+		let openKey
 		menuConfig.forEach((item)=>{
 			if(item.children){
 				// console.log(item)
@@ -92,17 +101,15 @@ class LeftNav extends Component{
 					// console.log(items.key === pathName)
 					if(items.key === pathName){
 						openKey = item.key;
-						thisTitle = items.title;
+						// thisTitle = items.title;
 					}
 				})
 			}else if(item.key === pathName){
-				thisTitle = item.title;
+				// thisTitle = item.title;
 			}
 		})
 		//设置当前要选中的菜单项以及需要展开的菜单列表
 		// this.setState({ pathKey: pathName,openKey: openKey || 'sub1'})
-		//将对应选中项的文字保存于内存中方便调用
-		memoryUtils.title = thisTitle;
 		this.menuNodes = this.getMenuNodes(menuConfig);
 		//返回相应参数用于设置state
 		return {pathName:pathName,openKey:openKey}
@@ -134,7 +141,6 @@ class LeftNav extends Component{
 			          defaultSelectedKeys={[this.state.pathKey]}
 			          defaultOpenKeys={[this.state.openKey]}
 			          style={{ height: '100%', borderRight: 0,backgroundColor:"#001529" }}
-			          onClick={this.handleClick.bind(this)}
 			        >
 			          {this.menuNodes}
 			        </Menu>
@@ -143,4 +149,7 @@ class LeftNav extends Component{
 		)
 	}
 }
-export default withRouter(LeftNav)
+export default connect(
+	state => ({user:state.user}),
+	{setHeadTitle}
+)(withRouter(LeftNav))
