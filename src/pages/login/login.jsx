@@ -1,14 +1,13 @@
-import React,{Component} from 'react'
+import React,{PureComponent} from 'react'
 import {Redirect} from 'react-router-dom'
-import { Form, Input, Button,message } from 'antd';
+import { Form, Input, Button } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import memoryUtils from '../../utils/memoryUtils'
-import storageUtils from '../../utils/storageUtils'
 
 import './login.less'
 import logo from '../../assets/images/logo.png'
-//获取封装的登录api
-import {reqLogin} from '../../api/'
+
+import {login} from '../../redux/actions'
+import {connect} from 'react-redux'
  
 //表单验证
 const minNum = 4;
@@ -16,7 +15,7 @@ const maxNum = 12;
 const formPattern =/^\w{4,12}$/;
 
 // 登陆的路由组件
-export default class Login extends Component{
+class Login extends PureComponent{
 	//在Form的ref属性中绑定它 之后就能调用Form进行相应API操作
 	formRef = React.createRef();
 	//提交表单且数据验证成功后回调事件	
@@ -25,34 +24,9 @@ export default class Login extends Component{
 		// console.log('Success:', values);
 		//验证成功后的数据进行解构赋值并传递给登录api进行ajax
 		const {username,password} = values
-		//加上async 和 await 达到简化promise对象的使用 不用使用then()来指定成功/失败的回调
-		//并用同步编码方式达到异步流程
-		// try{
-			//await 会异步等待async的完成的返回值
-			//在返回promise的表达式左侧使用await 这样就能异步获取到promise异步执行成功的value数据
-		const response = await reqLogin(username,password)
-		const result = response.data
-		console.log('success',result)
-		// }catch(error){
-			//但因为ajax封装时候就进行了错误的功能包装 所以不需要再调用时考虑调用失败的回调提示
-			// 想要触发就是ajax的url请求地址出错时 
-			// console.log('error',error)
-		// }
-		//通过ajax请求后返回的值判断是否登陆成功
-		if(response.status===0){
-			//登录成功
-			message.success('登录成功！')
-			//将登录信息进行保存 方便之后管理界面的调用 这个是将其保存于内存中
-			memoryUtils.user = result
-			//这个是保存在Storage中 这样刷新时也能保存登陆状态
-			storageUtils.saveUser(result)
+		
+		this.props.login(username,password)
 
-			//跳转到管理界面 (不需要回退到登陆界面 直接前往管理后台界面即可)
-			this.props.history.replace('/')
-		}else{
-			//登陆失败
-			message.error(response.msg)
-		}
   	}
 	//提交表单且数据验证失败后回调事件	
 	onFinishFailed = (errorInfo)=>{
@@ -72,9 +46,9 @@ export default class Login extends Component{
 	// }
 
 	render(){
-		const user = memoryUtils.user
+		const user = this.props.user
 		if(user && user._id){
-			return <Redirect to="/" />
+			return <Redirect to="/home" />
 		}
 
 		return(
@@ -84,6 +58,7 @@ export default class Login extends Component{
 					<h1>React项目:后台管理系统</h1>
 				</header>
 				<section className="login-content">
+					<div className={user.errorMsg?'error-msg show':'error-msg'}>{user.errorMsg}</div>
 					<h2>用户登陆</h2>
 					<Form
 				      className="login-form"
@@ -128,3 +103,7 @@ export default class Login extends Component{
 		)
 	}
 }
+export default connect(
+	state=>({user:state.user}),
+	{login}
+)(Login)

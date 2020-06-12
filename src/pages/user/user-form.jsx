@@ -20,11 +20,6 @@ export default class UserForm extends PureComponent{
 		  wrapperCol: { span: 14 },
 		}
 	}
-	constructor(props){
-		super(props);
-		// this.props.setForm(this.formRef)
-		// console.log(this.props.data)
-	}
 	componentDidMount(){
 		// console.log(this.formRef)
 		this.props.setForm(this.formRef)

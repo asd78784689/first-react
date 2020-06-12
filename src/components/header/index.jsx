@@ -1,7 +1,8 @@
 import React,{Component} from 'react'
 import {withRouter} from 'react-router-dom'
 import {Button } from 'antd'
-import memoryUtils from '../../utils/memoryUtils'
+import {connect} from 'react-redux'
+import {Logout} from '../../redux/actions'
 import storageUtils from '../../utils/storageUtils'
 import {reqWeather} from '../../api/index'
 import {formateDate} from '../../utils/dateUtils'
@@ -23,7 +24,7 @@ class Header extends Component{
 		// console.log('退出')
 		//删除内存中的登陆数据
 		storageUtils.removeUser()
-		memoryUtils.user = '';
+		this.props.Logout()
 		// console.log(this.props)
 		this.props.history.push('/login')
 	}
@@ -38,7 +39,7 @@ class Header extends Component{
 		} 
 	}
 	//当组件完成时候再进行jsonp请求
-	componentDidMount(){
+	componentWillMount(){
 		reqWeather('河源').then(response=>{
 			// console.log(response)
 			this.setState({ dayPicUrl: response.dayPictureUrl,weather: response.weather || '晴'})
@@ -53,14 +54,14 @@ class Header extends Component{
 	}
 
 	render(){
-		const user = memoryUtils.user.username;
-		const title = memoryUtils.title || '首页';
+		const username = this.props.user.username;
+		const title = this.props.headTitle;
 		const {dayPicUrl,weather,currentTime} = this.state
 		// console.log(this.state)
 		return(
 			<div className="header">
 				<div className="header-top">
-					<span>欢迎,{user}</span>
+					<span>欢迎,{username}</span>
 					<Button type="link" onClick={this.handleClick}>退出</Button>
 				</div>
 				<div className="header-bottom">
@@ -77,4 +78,11 @@ class Header extends Component{
 		)
 	}
 }
-export default withRouter(Header)
+//用 connect 使其包装为 容器组件 方便接收state
+export default connect(
+	state=>({
+		headTitle:state.headTitle,
+		user:state.user
+	}),
+	{Logout}
+)(withRouter(Header))

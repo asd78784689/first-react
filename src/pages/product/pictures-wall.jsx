@@ -24,23 +24,6 @@ export default class PicturesWall extends Component{
 	    ],
 	};
 
-
-	constructor(props){
-		super(props)
-		// console.log(props.imgs)
-		// console.log(this.props.imgs)
-		//定义一个方法 循环创建 imgs传过来的img数据
-		//设置为state中的fileList
-		// fileList: [
-		    //   {
-		    //     uid: '-1',   //负数最好
-		    //     name: 'image.png',
-		    //     status: 'done',
-		    //     url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-		    //   },
-		    // ]
-		
-	}
 	componentDidMount(){
 		const imgsData = this.props.imgs
 		if(imgsData && imgsData.length>0){
