@@ -1,5 +1,11 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+# React 开发的 后台管理平台 
+
+### 预览图片：
+![image](https://github.com/asd78784689/first-react/blob/master/works-9.png)
+![image](https://github.com/asd78784689/first-react/blob/master/works-10.png)
+
 ## Available Scripts
 
 In the project directory, you can run:
